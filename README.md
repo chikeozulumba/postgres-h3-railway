@@ -55,4 +55,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-Developed and maintained by [Chike Ozulumba](https://chikeozulumba.com). For issues or suggestions, please open an issue on the [GitHub repository](https://github.com/MykalMachon/grafana-stack-railway).
+Developed and maintained by [Chike Ozulumba](https://chikeozulumba.com). For issues or suggestions, please open an issue on the [GitHub repository](https://github.com/chikeozulumba/postgres-h3-railway).
