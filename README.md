@@ -6,7 +6,7 @@ This template provides a PostgreSQL database with PostGIS and Uber's H3 extensio
 
 - PostgreSQL 16
 - PostGIS 3.4
-- Uber's H3 extension for hexagonal hierarchical geospatial indexing
+- Uber's H3 postgres extension bindings for hexagonal hierarchical geospatial indexing [https://github.com/zachasme/h3-pg](https://github.com/zachasme/h3-pg)
 - Pre-configured extensions and dependencies
 
 ## Prerequisites
