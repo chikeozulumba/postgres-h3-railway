@@ -2,6 +2,8 @@
 
 This template provides a PostgreSQL database with PostGIS and Uber's H3 extension pre-installed, ready to deploy on Railway.
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/0c4k7A?referralCode=8bSENY)
+
 ## Features
 
 - PostgreSQL 16
