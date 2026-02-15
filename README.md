@@ -43,11 +43,23 @@ Start the database using Docker Compose:
 docker-compose up -d
 ```
 
-Connect to the database:
+Connect to the database (use the same `POSTGRES_DB` and `POSTGRES_PASSWORD` as in your `.env`):
 
 ```bash
-psql -h localhost -p 54040 -U postgres -d postgres-h3-db
+psql -h localhost -p 54040 -U postgres -d postgresh3db -W
 ```
+Enter the password when prompted (e.g. `postgres` if that’s your `POSTGRES_PASSWORD`).
+
+### "password authentication failed for user postgres"
+
+- **Use the right port and password:** With docker-compose the app is on port **54040** (mapped from 5432). Connect with the same password as in `.env` (`POSTGRES_PASSWORD`).
+- **Stale volume:** The password is set only when the data directory is first created. If you previously ran the container without `POSTGRES_PASSWORD` or with a different one, the existing volume still has the old password. Reset and re-init:
+
+  ```bash
+  docker-compose down -v
+  docker-compose up -d
+  ```
+  (`-v` removes the `postgres_data` volume so the next startup re-initializes with your current `.env`.)
 
 ## Contributing
 
