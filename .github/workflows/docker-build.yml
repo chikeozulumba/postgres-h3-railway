@@ -59,7 +59,7 @@ jobs:
             fi
             sleep 2
           done
-          EXTS=$(docker exec pg psql -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -t -c "SELECT extname FROM pg_extension WHERE extname IN ('postgis', 'h3');")
+          EXTS=$(docker exec pg psql -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -t -c "SELECT extname FROM pg_extension WHERE extname IN ('postgis', 'h3');") || { echo "Failed to query extensions (connection or container issue)"; exit 1; }
           echo "$EXTS" | grep -q postgis || { echo "postgis extension not found"; exit 1; }
           echo "$EXTS" | grep -q h3 || { echo "h3 extension not found"; exit 1; }
           docker stop pg
