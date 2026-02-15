@@ -41,9 +41,16 @@ jobs:
             -e POSTGRES_DB=${{ env.POSTGRES_DB }} \
             -e POSTGRES_PORT=54040 \
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
-          # Wait for PostgreSQL to accept connections and for init scripts to finish
-          # (init runs after first "accepting connections", during which pg may report "rejecting connections")
-          for i in $(seq 1 60); do
+          # Wait for PostgreSQL to accept connections (server is up; init scripts will then run)
+          for i in $(seq 1 30); do
+            docker exec pg pg_isready -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} 2>/dev/null && break
+            sleep 2
+          done
+          # Init scripts run after first ready; during that time pg reports "rejecting connections". Wait for them to finish.
+          echo "Waiting for init scripts (postgis, h3) to complete..."
+          sleep 45
+          # Now poll until we can connect and see both extensions
+          for i in $(seq 1 40); do
             if docker exec pg pg_isready -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} 2>/dev/null; then
               EXTS=$(docker exec pg psql -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -t -c "SELECT extname FROM pg_extension WHERE extname IN ('postgis', 'h3');" 2>/dev/null) || true
               if echo "$EXTS" | grep -q postgis && echo "$EXTS" | grep -q h3; then
@@ -52,7 +59,6 @@ jobs:
             fi
             sleep 2
           done
-          docker exec pg pg_isready -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }}
           EXTS=$(docker exec pg psql -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -t -c "SELECT extname FROM pg_extension WHERE extname IN ('postgis', 'h3');")
           echo "$EXTS" | grep -q postgis || { echo "postgis extension not found"; exit 1; }
           echo "$EXTS" | grep -q h3 || { echo "h3 extension not found"; exit 1; }
