@@ -40,7 +40,7 @@ RUN chmod +x /docker-entrypoint-initdb.d/01-user.sh
 
 # Create initialization script
 RUN echo "CREATE EXTENSION IF NOT EXISTS postgis;" > /docker-entrypoint-initdb.d/01-extensions.sql 
-RUN echo "CREATE EXTENSION IF NOT EXISTS h3;" > /docker-entrypoint-initdb.d/01-extensions.sql 
+RUN echo "CREATE EXTENSION IF NOT EXISTS h3;" >> /docker-entrypoint-initdb.d/01-extensions.sql 
 
 # Expose PostgreSQL port
 EXPOSE 5432
