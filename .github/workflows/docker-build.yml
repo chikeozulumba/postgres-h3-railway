@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  IMAGE_NAME: postgres-h3
+  IMAGE_NAME: postgres-postgis-h3
   POSTGRES_USER: testuser
   POSTGRES_PASSWORD: testpass
   POSTGRES_DB: testdb
