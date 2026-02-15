@@ -1,0 +1,6 @@
+# Allow repo-specific secrets/vars the linter cannot see
+# Required: Variables → DOCKERHUB_USERNAME; Secrets → DOCKERHUB_TOKEN
+paths:
+  ".github/workflows/*.yml":
+    ignore:
+      - "Context access might be invalid: .+"
