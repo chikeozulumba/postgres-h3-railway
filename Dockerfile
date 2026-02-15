@@ -47,3 +47,4 @@ EXPOSE 5432
 
 # Match base image: run as postgres when container starts
 USER postgres
+
