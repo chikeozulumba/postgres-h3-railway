@@ -6,9 +6,9 @@ This template provides a PostgreSQL database with PostGIS and Uber's H3 extensio
 
 ## Features
 
-- PostgreSQL 16
+- PostgreSQL 17
 - PostGIS 3.4
-- Uber's H3 postgres extension bindings for hexagonal hierarchical geospatial indexing [https://github.com/zachasme/h3-pg](https://github.com/zachasme/h3-pg)
+- Uber's H3 postgres extension bindings for hexagonal hierarchical geospatial indexing [https://github.com/postgis/h3-pg](https://github.com/postgis/h3-pg)
 - Pre-configured extensions and dependencies
 
 ## Prerequisites
@@ -47,7 +47,9 @@ Connect to the database (use the same `POSTGRES_DB` and `POSTGRES_PASSWORD` as i
 
 ```bash
 psql -h localhost -p 54040 -U postgres -d postgresh3db -W
+
 ```
+
 Enter the password when prompted (e.g. `postgres` if that’s your `POSTGRES_PASSWORD`).
 
 ### "password authentication failed for user postgres"
@@ -59,6 +61,7 @@ Enter the password when prompted (e.g. `postgres` if that’s your `POSTGRES_PAS
   docker-compose down -v
   docker-compose up -d
   ```
+
   (`-v` removes the `postgres_data` volume so the next startup re-initializes with your current `.env`.)
 
 ## Contributing
