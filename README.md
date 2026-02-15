@@ -18,13 +18,7 @@ This template provides a PostgreSQL database with PostGIS and Uber's H3 extensio
 
 ## Environment Variables
 
-These are the required Postgres variables which can be modified before deployment, they contain the default values.
-
-```env
-POSTGRES_DB=postgres-h3-db
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-```
+Docker Compose reads `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` from a `.env` file. These are the same variables used for deployment; you can change the values in `.env` before first run.
 
 ## Local Development
 
@@ -37,7 +31,13 @@ cd postgres-h3
 
 ## Running using docker
 
-Start the database using Docker Compose:
+Create a `.env` file so Docker Compose and the database init scripts have valid values (without it, variables are empty and initialization will fail):
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` if you want different database name, user, or password. Then start the database:
 
 ```bash
 docker-compose up -d
