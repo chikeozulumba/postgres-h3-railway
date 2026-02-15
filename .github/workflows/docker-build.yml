@@ -1,0 +1,88 @@
+name: Docker build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  IMAGE_NAME: postgres-h3
+  POSTGRES_USER: testuser
+  POSTGRES_PASSWORD: testpass
+  POSTGRES_DB: testdb
+  POSTGRES_PORT: 54040
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run container and verify
+        run: |
+          docker run -d -p 54040:5432 --name pg \
+            -e POSTGRES_USER=${{ env.POSTGRES_USER }} \
+            -e POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }} \
+            -e POSTGRES_DB=${{ env.POSTGRES_DB }} \
+            -e POSTGRES_PORT=54040 \
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          # Wait for PostgreSQL to accept connections and for init scripts to finish
+          # (init runs after first "accepting connections", during which pg may report "rejecting connections")
+          for i in $(seq 1 60); do
+            if docker exec pg pg_isready -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} 2>/dev/null; then
+              EXTS=$(docker exec pg psql -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -t -c "SELECT extname FROM pg_extension WHERE extname IN ('postgis', 'h3');" 2>/dev/null) || true
+              if echo "$EXTS" | grep -q postgis && echo "$EXTS" | grep -q h3; then
+                break
+              fi
+            fi
+            sleep 2
+          done
+          docker exec pg pg_isready -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }}
+          EXTS=$(docker exec pg psql -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -t -c "SELECT extname FROM pg_extension WHERE extname IN ('postgis', 'h3');")
+          echo "$EXTS" | grep -q postgis || { echo "postgis extension not found"; exit 1; }
+          echo "$EXTS" | grep -q h3 || { echo "h3 extension not found"; exit 1; }
+          docker stop pg
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Required: repo Secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets['DOCKERHUB_USERNAME'] }}
+          password: ${{ secrets['DOCKERHUB_TOKEN'] }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ${{ secrets['DOCKERHUB_USERNAME'] }}/${{ env.IMAGE_NAME }}:latest
+            ${{ secrets['DOCKERHUB_USERNAME'] }}/${{ env.IMAGE_NAME }}:${{ github.sha }}

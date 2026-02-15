@@ -18,13 +18,7 @@ This template provides a PostgreSQL database with PostGIS and Uber's H3 extensio
 
 ## Environment Variables
 
-These are the required Postgres variables which can be modified before deployment, they contain the default values.
-
-```env
-POSTGRES_DB=postgres-h3-db
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-```
+Docker Compose reads `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` from a `.env` file. These are the same variables used for deployment; you can change the values in `.env` before first run.
 
 ## Local Development
 
@@ -37,17 +31,35 @@ cd postgres-h3
 
 ## Running using docker
 
-Start the database using Docker Compose:
+Create a `.env` file so Docker Compose and the database init scripts have valid values (without it, variables are empty and initialization will fail):
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` if you want different database name, user, or password. Then start the database:
 
 ```bash
 docker-compose up -d
 ```
 
-Connect to the database:
+Connect to the database (use the same `POSTGRES_DB` and `POSTGRES_PASSWORD` as in your `.env`):
 
 ```bash
-psql -h localhost -p 54040 -U postgres -d postgres-h3-db
+psql -h localhost -p 54040 -U postgres -d postgresh3db -W
 ```
+Enter the password when prompted (e.g. `postgres` if that’s your `POSTGRES_PASSWORD`).
+
+### "password authentication failed for user postgres"
+
+- **Use the right port and password:** With docker-compose the app is on port **54040** (mapped from 5432). Connect with the same password as in `.env` (`POSTGRES_PASSWORD`).
+- **Stale volume:** The password is set only when the data directory is first created. If you previously ran the container without `POSTGRES_PASSWORD` or with a different one, the existing volume still has the old password. Reset and re-init:
+
+  ```bash
+  docker-compose down -v
+  docker-compose up -d
+  ```
+  (`-v` removes the `postgres_data` volume so the next startup re-initializes with your current `.env`.)
 
 ## Contributing
 
